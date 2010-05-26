@@ -1,0 +1,64 @@
+#!/usr/local/bin/node
+
+var sys = require('sys'),
+    http = require('http'),
+    fs = require('fs'),
+    querystring = require('querystring'),
+    spawn = require('child_process').spawn;
+
+var FILE_TO_COMPILE = process.ARGV[2] || "SoundEffect.js";
+
+var request = http.createClient(80, 'closure-compiler.appspot.com').request('POST', '/compile', {
+    'Host': 'closure-compiler.appspot.com',
+    'Content-Type': 'application/x-www-form-urlencoded'
+});
+
+sys.print("Sending \""+FILE_TO_COMPILE+"\" to Google Closure Compiler..");
+
+request.write(querystring.stringify({
+    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+    'output_format': 'json',
+    'output_info': 'compiled_code',
+    'js_externs': 'swfobject={};swfobject.embedSWF=function(){};',
+    'js_code': fs.readFileSync(FILE_TO_COMPILE)
+}));
+
+request.addListener('response', function (response) {
+    var res = "";
+    response.setEncoding('utf8');
+    response.addListener('data', function (chunk) {
+        sys.print('.');
+        res += chunk;
+    });
+    response.addListener('end', function () {
+        sys.puts(' done!');
+        var compiledCode = JSON.parse(res).compiledCode;
+        var outputFilename = FILE_TO_COMPILE.substring(0, FILE_TO_COMPILE.lastIndexOf('js')) + "min.js";
+        sys.puts('Saving compiled code to "'+outputFilename+'"');
+        fs.writeFileSync(outputFilename, compiledCode);
+        
+        // Now that the Closure Compiler is complete, invoke 'haxe'
+        haxeCompile();
+    });
+});
+
+request.end();
+
+/**
+ * Calls the 'haxe' command line build program to build the HaXe source
+ * in 'src' into a Flash player compliant SWF file. This gets called
+ * AFTER the Closure Compiler request completes.
+ */
+function haxeCompile() {
+    sys.print("Invoking HaXe Compiler..");
+    var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 SoundEffect.swf".split(" "));
+    haxe.stdout.addListener("data", function(data) {
+        sys.print('stdout: ' + data);
+    });
+    haxe.stderr.addListener("data", function(data) {
+        sys.print('stderr: ' + data);
+    });
+    haxe.addListener('exit', function(code) {
+        sys.puts('. done! (exit code: ' + code + ')');
+    });
+}

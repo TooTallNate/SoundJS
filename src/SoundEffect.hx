@@ -1,0 +1,150 @@
+/* The MIT License
+ * 
+ * Copyright (c) 2010 Nathan Rajlich
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+import flash.external.ExternalInterface;
+import flash.media.Sound;
+import flash.media.SoundChannel;
+import flash.media.SoundTransform;
+import flash.net.URLRequest;
+import haxe.Timer;
+
+class SoundEffect {
+    private var sound : Sound;
+    
+    public function new(fallbackId:Int, src:String, volume:Float, muted:Bool) {
+        this.sound = new Sound();
+        //this.sound.addEventListener("complete", soundComplete);
+        //this.sound.addEventListener("id3", soundId3);
+        //this.sound.addEventListener("ioError", soundIoError);
+        //this.sound.addEventListener("open", soundOpen);
+        //this.sound.addEventListener("progress", soundProgress);
+        this.load(src);
+    }
+
+    public function load(src:String) {
+        if(this.sound.bytesLoaded < this.sound.bytesTotal)
+            this.sound.close();
+        this.sound.load(new URLRequest(src));
+    }
+    
+    public function play() {
+        //if (this.lastPosition == this.sound.length) this.lastPosition = 0;
+        //this.channel = this.sound.play(this.lastPosition, 0, this.transform);
+        //this.channel.addEventListener("soundComplete", this.channelComplete);
+        //this.playTimer = new Timer(200);
+        //this.playTimer.run = this.sendTimeUpdate;
+    }
+
+    /*
+    private function sendTimeUpdate() {
+        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "timeupdate");
+    }
+
+    // Called when the sound finishes playing to the end (by SoundChannel's 'soundComplete' event)
+    private function channelComplete(e) {
+        //ExternalInterface.call("console.log", "channelComplete");
+        this.playTimer.stop();
+        this.channel.removeEventListener("soundComplete", this.channelComplete);
+        this.channel.stop();
+        this.channel = null;
+        this.lastPosition = this.sound.length;
+        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__endedCallback");
+    }
+    
+    ///////////////////  Event Handlers  ///////////////////
+    private function soundComplete(e) {
+        ExternalInterface.call("(function() { " +
+            "var s = HTMLAudioElement.__swfSounds["+this.fallbackId+"]; " +
+            "s.__duration = " + (this.sound.length/1000) + "; " +
+            "s.__fireMediaEvent('durationchange'); "+
+            "s.__fireMediaEvent('progress', "+this.sound.bytesLoaded+", "+this.sound.bytesTotal+"); "+
+        "})");
+        //ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "progress", this.sound.bytesLoaded, this.sound.bytesTotal);
+    }
+    
+    private function soundId3(e) {
+        //ExternalInterface.call("console.log", e);
+    }
+    
+    private function soundIoError(e) {
+        this.sound.close();
+        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__errorCallback");
+    }
+    
+    private function soundOpen(e) {
+    }
+    
+    private function soundProgress(e) {
+        var now : Float = Date.now().getTime();
+        if (!this.metadataSent) {
+            var percent : Float = this.sound.bytesLoaded / this.sound.bytesTotal;
+            // Set the duration to a calculated estimate while its loading
+            this.duration = this.sound.length * this.sound.bytesLoaded / this.sound.bytesTotal / 1000;
+            if (this.duration > 0 && percent > .05) {
+                ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__metadataCallback", this.duration);
+                this.metadataSent = true;
+            }
+        }
+        if (this.sound.bytesLoaded > 0 && now - this.lastProgressEvent > 350) {            
+            this.lastProgressEvent = now;
+            ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "progress", this.sound.bytesLoaded, this.sound.bytesTotal);
+        }
+    }
+    */
+
+
+
+
+
+
+    public static var sounds:Array<SoundEffect> = new Array();
+    
+    // ExternalInterface functions available to JavaScript
+    public static function IS_SOUNDEFFECT_JS() {
+        return true;
+    }
+
+    public static function Load(index:Int, src:String) {
+        var sound:SoundEffect = sounds[index];
+        sound.load(src);
+    }
+    
+    public static function Play(index:Int) {
+        var sound:SoundEffect = sounds[index];
+        sound.play();
+    }
+
+    public static function main() {
+        ExternalInterface.addCallback("IS_SOUNDEFFECT_JS", IS_SOUNDEFFECT_JS);
+        ExternalInterface.addCallback("_load", Load);
+        ExternalInterface.addCallback("_play", Play);
+        ExternalInterface.call([
+        "(function(){",
+            "var f = function(tag){",
+                "var elems = document.getElementsByTagName(tag);",
+                "for (var i=0; i<elems.length; i++) if (elems[i].IS_SOUNDEFFECT_JS) return elems[i];",
+            "};",
+            "SoundEffect._swf = f('embed') || f('object');",
+        "})" ].join(''));
+        ExternalInterface.call("SoundEffect._swfReady");            
+    }
+}
