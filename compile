@@ -13,15 +13,16 @@ var request = http.createClient(80, 'closure-compiler.appspot.com').request('POS
     'Content-Type': 'application/x-www-form-urlencoded'
 });
 
-sys.print("Sending \""+FILE_TO_COMPILE+"\" to Google Closure Compiler..");
+sys.print("Sending \""+FILE_TO_COMPILE+"\" to Google Closure Compiler");
+var printDots = new PrintDots(30);
 
 request.write(querystring.stringify({
     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
     'output_format': 'json',
-    'output_info': 'compiled_code',
+    'output_info': ['compiled_code', 'warnings', 'errors', 'statistics'],
     'js_externs': 'swfobject={};swfobject.embedSWF=function(){};',
     'js_code': fs.readFileSync(FILE_TO_COMPILE)
-}));
+}, '&', '=', false));
 
 request.addListener('response', function (response) {
     var res = "";
@@ -31,8 +32,13 @@ request.addListener('response', function (response) {
         res += chunk;
     });
     response.addListener('end', function () {
+        printDots.stop();
         sys.puts(' done!');
-        var compiledCode = JSON.parse(res).compiledCode;
+        //sys.puts(res);
+        var json = JSON.parse(res);
+        var compiledCode = json.compiledCode;
+        delete json.compiledCode;
+        sys.puts(sys.inspect(json));
         var outputFilename = FILE_TO_COMPILE.substring(0, FILE_TO_COMPILE.lastIndexOf('js')) + "min.js";
         sys.puts('Saving compiled code to "'+outputFilename+'"');
         fs.writeFileSync(outputFilename, compiledCode);
@@ -50,15 +56,27 @@ request.end();
  * AFTER the Closure Compiler request completes.
  */
 function haxeCompile() {
-    sys.print("Invoking HaXe Compiler..");
+    sys.print("Invoking HaXe Compiler.");
+    var dots = new PrintDots(10);
     var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 SoundEffect.swf".split(" "));
     haxe.stdout.addListener("data", function(data) {
-        sys.print('stdout: ' + data);
+        //sys.print(data);
     });
     haxe.stderr.addListener("data", function(data) {
-        sys.print('stderr: ' + data);
+        sys.print('\nstderr: ' + data);
     });
     haxe.addListener('exit', function(code) {
-        sys.puts('. done! (exit code: ' + code + ')');
+        dots.stop();
+        sys.puts(' done! (exit code: ' + code + ')');
     });
 }
+
+function PrintDots(interval) {
+    var num = setInterval(function() {
+        sys.print('.');
+    }, interval);
+    this.stop = function() {
+        clearInterval(num);
+    }
+}
+
