@@ -20,7 +20,7 @@ request.write(querystring.stringify({
     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
     'output_format': 'json',
     'output_info': ['compiled_code', 'warnings', 'errors', 'statistics'],
-    'js_externs': 'swfobject={};swfobject.embedSWF=function(){};',
+    'js_externs': 'swfobject.embedSWF=function(){};',
     'js_code': fs.readFileSync(FILE_TO_COMPILE)
 }, '&', '=', false));
 
