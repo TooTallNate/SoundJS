@@ -28,47 +28,42 @@ import flash.net.URLRequest;
 import haxe.Timer;
 
 class SoundEffect {
+    private var src : String;
     private var sound : Sound;
-    
-    public function new(fallbackId:Int, src:String, volume:Float, muted:Bool) {
+
+    public function new(src:String) {
+        this.src = src;
         this.sound = new Sound();
         //this.sound.addEventListener("complete", soundComplete);
         //this.sound.addEventListener("id3", soundId3);
         //this.sound.addEventListener("ioError", soundIoError);
         //this.sound.addEventListener("open", soundOpen);
         //this.sound.addEventListener("progress", soundProgress);
-        this.load(src);
-    }
-
-    public function load(src:String) {
-        if(this.sound.bytesLoaded < this.sound.bytesTotal)
-            this.sound.close();
         this.sound.load(new URLRequest(src));
     }
-    
+
     public function play() {
-        //if (this.lastPosition == this.sound.length) this.lastPosition = 0;
-        //this.channel = this.sound.play(this.lastPosition, 0, this.transform);
-        //this.channel.addEventListener("soundComplete", this.channelComplete);
-        //this.playTimer = new Timer(200);
-        //this.playTimer.run = this.sendTimeUpdate;
+        var channel : SoundChannel = this.sound.play(0);
+        channel.addEventListener("soundComplete", this.channelComplete);
     }
 
-    /*
-    private function sendTimeUpdate() {
-        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "timeupdate");
-    }
 
     // Called when the sound finishes playing to the end (by SoundChannel's 'soundComplete' event)
     private function channelComplete(e) {
         //ExternalInterface.call("console.log", "channelComplete");
-        this.playTimer.stop();
-        this.channel.removeEventListener("soundComplete", this.channelComplete);
-        this.channel.stop();
-        this.channel = null;
-        this.lastPosition = this.sound.length;
-        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__endedCallback");
+        //this.playTimer.stop();
+        //this.channel.removeEventListener("soundComplete", this.channelComplete);
+        //this.channel.stop();
+        //this.channel = null;
+        //this.lastPosition = this.sound.length;
+        //ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__endedCallback");
     }
+
+
+
+
+
+    /*
     
     ///////////////////  Event Handlers  ///////////////////
     private function soundComplete(e) {
@@ -123,9 +118,16 @@ class SoundEffect {
         return true;
     }
 
-    public static function Load(index:Int, src:String) {
-        var sound:SoundEffect = sounds[index];
-        sound.load(src);
+    public static function Load(src:String) {
+        try {
+            ExternalInterface.call("console.log", src);
+            var sound:SoundEffect = new SoundEffect(src);
+            sounds.push(sound);
+            return sounds.length;
+        } catch (e : Dynamic) {
+            ExternalInterface.call("console.log", e);
+            return 0;
+        }
     }
     
     public static function Play(index:Int) {
@@ -148,3 +150,4 @@ class SoundEffect {
         ExternalInterface.call("SoundEffect._swfReady");            
     }
 }
+
