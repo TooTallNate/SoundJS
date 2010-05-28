@@ -57,13 +57,13 @@ request.end();
  */
 function haxeCompile() {
     sys.print("Invoking HaXe Compiler.");
-    var dots = new PrintDots(10);
+    var dots = new PrintDots(20);
     var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 SoundEffect.swf".split(" "));
     haxe.stdout.addListener("data", function(data) {
-        //sys.print(data);
+        sys.puts('\nstdout: ' + data);
     });
     haxe.stderr.addListener("data", function(data) {
-        sys.print('\nstderr: ' + data);
+        sys.puts('\nstderr: ' + data);
     });
     haxe.addListener('exit', function(code) {
         dots.stop();

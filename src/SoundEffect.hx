@@ -21,11 +21,11 @@
  * THE SOFTWARE.
  */
 import flash.external.ExternalInterface;
+import flash.events.Event;
 import flash.media.Sound;
 import flash.media.SoundChannel;
 import flash.media.SoundTransform;
 import flash.net.URLRequest;
-import haxe.Timer;
 
 class SoundEffect {
     private var src : String;
@@ -42,21 +42,13 @@ class SoundEffect {
         this.sound.load(new URLRequest(src));
     }
 
-    public function play(offset:Float, volume:Float, pan:Float) {
+    public function play(offset:Float, volume:Float, pan:Float, channelId:Int) {
         var channel : SoundChannel = this.sound.play(offset, 0, new SoundTransform(volume, pan));
-        //channel.addEventListener("soundComplete", this.channelComplete);
-    }
-
-
-    // Called when the sound finishes playing to the end (by SoundChannel's 'soundComplete' event)
-    private function channelComplete(e) {
-        //ExternalInterface.call("console.log", "channelComplete");
-        //this.playTimer.stop();
-        //this.channel.removeEventListener("soundComplete", this.channelComplete);
-        //this.channel.stop();
-        //this.channel = null;
-        //this.lastPosition = this.sound.length;
-        //ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__endedCallback");
+        channel.addEventListener(Event.SOUND_COMPLETE, function(e) {
+            //ExternalInterface.call("console.log", "channelComplete");
+            channels[channelId] = null;
+        });
+        return channel;
     }
 
 
@@ -111,7 +103,8 @@ class SoundEffect {
 
 
 
-    public static var sounds:Array<SoundEffect> = new Array();
+    public static var sounds :  Array<SoundEffect> = new Array();
+    public static var channels : Array<SoundChannel> = new Array();
     
     // ExternalInterface functions available to JavaScript
     public static function IS_SOUNDEFFECT_JS() {
@@ -119,26 +112,30 @@ class SoundEffect {
     }
 
     public static function Load(src:String) {
-        try {
-            ExternalInterface.call("console.log", src);
-            var sound:SoundEffect = new SoundEffect(src);
-            sounds.push(sound);
-            return sounds.length-1;
-        } catch (e : Dynamic) {
-            ExternalInterface.call("console.log", e);
-            return 0;
-        }
+        ExternalInterface.call("console.log", src);
+        var sound:SoundEffect = new SoundEffect(src);
+        sounds.push(sound);
+        return sounds.length-1;
     }
     
     public static function Play(index:Int, offset:Float, volume:Float, pan:Float) {
-        var sound:SoundEffect = sounds[index];
-        sound.play(offset, volume, pan);
+        var channelId : Int = channels.length;
+        var sound : SoundEffect = sounds[index];
+        var channel : SoundChannel = sound.play(offset, volume, pan, channelId);
+        channels.push(channel);
+        return channelId;
+    }
+    
+    public static function Stop(index:Int) {
+        var sound:SoundChannel = channels[index];
+        sound.stop();        
     }
 
     public static function main() {
         ExternalInterface.addCallback("IS_SOUNDEFFECT_JS", IS_SOUNDEFFECT_JS);
         ExternalInterface.addCallback("_load", Load);
         ExternalInterface.addCallback("_play", Play);
+        ExternalInterface.addCallback("_stop", Stop);
         ExternalInterface.call([
         "(function(){",
             "var f = function(tag){",
@@ -150,4 +147,3 @@ class SoundEffect {
         ExternalInterface.call("SoundEffect._swfReady");            
     }
 }
-

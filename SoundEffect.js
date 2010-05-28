@@ -54,6 +54,7 @@
             console.log("attempting to load '"+self.src+"' via flash");
             audio = {};
             audio.flash = true;
+            audio.src = self.src;
             audio.id = SWF['_load'](self.src);
         }
 
@@ -66,40 +67,80 @@
         }
         
         /**
-         * Creates a 'Play' instace.
+         * Creates and returns a SoundInstance with the specified options.
          */
         self.play = function(options) {
             options = options || {};
             options['volume'] = options['volume'] || 1;
             options['pan'] = options['pan'] || 0;
             options['offset'] = options['offset'] || 0;
-            if (audio.flash) {
-                // Play through Flash
-                console.log("attempting to play '" + self.src + "' via flash: fid=" + audio.id);
-                SWF['_play'](audio.id, options['offset'], options['volume'], options['pan']);
-            } else {
-                // Play HTML5
-                console.log("attempting to play '" + self.src + "' natively");
-                var play = audio.cloneNode(false);
-                play['muted'] = false;
-                play['volume'] = options['volume'];
-                //play['currentTime'] = options['offset'];
-                // 'pan' is not (currently) supported by HTML5 Audio
-                play.play();
-            }
+            return new SoundInstance(audio, options);
         }
         
         self.on = function(event, callback) {
             
         }
 
-        self['audio'] = audio;
+        // Debug
+        //self['audio'] = audio;
     }
         
     SoundEffect['version'] = VERSION;
     SoundEffect['forceFlash'] = false;
     
     
+    /**
+     * A SoundInstance represents an audio channel playing a sound file. They
+     * are created by calling SoundEffect#play. They are NOT reusable
+     */
+    function SoundInstance(controller, options) {
+        var self = this,
+            channel = null;
+        
+        // SoundInstance Initialization
+        if (controller.flash) {
+            // Play through Flash
+            console.log("attempting to play '" + controller.src + "' via flash: fid=" + controller.id);
+            channel = Number(SWF['_play'](controller.id, options['offset'], options['volume'], options['pan']));
+            channel.flash = true;
+            console.log(channel);
+        } else {
+            // Play HTML5
+            console.log("attempting to play '" + controller.src + "' natively");
+            channel = controller.cloneNode(false);
+            channel.addEventListener("ended", function() {
+                console.log(self + " ended");
+            }, false);
+            channel['muted'] = false;
+            channel['volume'] = options['volume'];
+            //channel['currentTime'] = options['offset'];
+            // 'pan' is not (currently) supported by HTML5 Audio
+            channel.play();
+        }
+        
+        self['setVolume'] = function(volume) {
+            if (channel.flash) {
+                // TODO
+                //SWF['_setVolume'](channel, volume);
+            } else {
+                channel['volume'] = volume;
+            }
+        }
+        self['getPosition'] = function() {
+            
+        }
+        self['setPosition'] = function(position) {
+            
+        }
+        self['stop'] = function() {
+            if (channel.flash) {
+                SWF['_stop'](channel);
+            } else {
+                channel.pause();
+            }
+        }
+    }
+
 
     // Embed the fallback <audio> SWF onto the page
     function embedSwf() {
