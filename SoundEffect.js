@@ -35,19 +35,23 @@
         var audio;
         
         var loadNative = function() {
-            audio = new Audio(self.src);
+            console.log("attempting to load '"+self.src+"' native");
+            audio = document.createElement("audio");
         	audio.addEventListener("progress", function() {
-                console.log("progress");
-                console.log(this);
+                console.log("native progress");
             }, false);
             audio.addEventListener("error", function() {
-                console.log("error");
+                console.log("native error, falling back to flash");
                 loadFlash();
             }, false);
+            audio.src = self.src;
             audio.load();
+            audio.muted = true;
+            audio.play();
         }
 
         var loadFlash = function() {
+            console.log("attempting to load '"+self.src+"' via flash");
             audio = {};
             audio.flash = true;
             audio.id = SWF['_load'](self.src);
@@ -57,7 +61,7 @@
             // Attempt to load through native HTML5 Audio
             loadNative();
         } else {
-            // Have Flash load and be in charge of the sound
+            // Have Flash load and be in charge of this sound
             loadFlash();
         }
         
@@ -65,14 +69,31 @@
          * Creates a 'Play' instace.
          */
         self.play = function(options) {
+            options = options || {};
+            options['volume'] = options['volume'] || 1;
+            options['pan'] = options['pan'] || 0;
+            options['offset'] = options['offset'] || 0;
             if (audio.flash) {
-                SWF['_play'](audio.id, options['volume'], options['pan']);
+                // Play through Flash
+                console.log("attempting to play '" + self.src + "' via flash: fid=" + audio.id);
+                SWF['_play'](audio.id, options['offset'], options['volume'], options['pan']);
             } else {
                 // Play HTML5
+                console.log("attempting to play '" + self.src + "' natively");
                 var play = audio.cloneNode(false);
-                console.log(play);
+                play['muted'] = false;
+                play['volume'] = options['volume'];
+                //play['currentTime'] = options['offset'];
+                // 'pan' is not (currently) supported by HTML5 Audio
+                play.play();
             }
         }
+        
+        self.on = function(event, callback) {
+            
+        }
+
+        self['audio'] = audio;
     }
         
     SoundEffect['version'] = VERSION;

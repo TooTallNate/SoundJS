@@ -42,9 +42,9 @@ class SoundEffect {
         this.sound.load(new URLRequest(src));
     }
 
-    public function play() {
-        var channel : SoundChannel = this.sound.play(0);
-        channel.addEventListener("soundComplete", this.channelComplete);
+    public function play(offset:Float, volume:Float, pan:Float) {
+        var channel : SoundChannel = this.sound.play(offset, 0, new SoundTransform(volume, pan));
+        //channel.addEventListener("soundComplete", this.channelComplete);
     }
 
 
@@ -123,16 +123,16 @@ class SoundEffect {
             ExternalInterface.call("console.log", src);
             var sound:SoundEffect = new SoundEffect(src);
             sounds.push(sound);
-            return sounds.length;
+            return sounds.length-1;
         } catch (e : Dynamic) {
             ExternalInterface.call("console.log", e);
             return 0;
         }
     }
     
-    public static function Play(index:Int) {
+    public static function Play(index:Int, offset:Float, volume:Float, pan:Float) {
         var sound:SoundEffect = sounds[index];
-        sound.play();
+        sound.play(offset, volume, pan);
     }
 
     public static function main() {
