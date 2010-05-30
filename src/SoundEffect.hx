@@ -30,25 +30,46 @@ import flash.net.URLRequest;
 class SoundEffect {
     private var src : String;
     private var sound : Sound;
+    private var soundId : Int;
 
-    public function new(src:String) {
+    public function new(src:String, soundId:Int) {
         this.src = src;
+        this.soundId = soundId;
         this.sound = new Sound();
-        //this.sound.addEventListener("complete", soundComplete);
-        //this.sound.addEventListener("id3", soundId3);
-        //this.sound.addEventListener("ioError", soundIoError);
-        //this.sound.addEventListener("open", soundOpen);
-        //this.sound.addEventListener("progress", soundProgress);
+        this.sound.addEventListener("complete", soundComplete);
+        this.sound.addEventListener("ioError", soundIoError);
+        this.sound.addEventListener("open", soundOpen);
+        this.sound.addEventListener("progress", soundProgress);
         this.sound.load(new URLRequest(src));
     }
 
     public function play(offset:Float, volume:Float, pan:Float, channelId:Int) {
         var channel : SoundChannel = this.sound.play(offset, 0, new SoundTransform(volume, pan));
         channel.addEventListener(Event.SOUND_COMPLETE, function(e) {
-            //ExternalInterface.call("console.log", "channelComplete");
+            ExternalInterface.call("SoundChannel["+channelId+"].done");
             channels[channelId] = null;
         });
         return channel;
+    }
+    
+    public function getLength() {
+        return this.sound.length;
+    }
+    
+    private function soundComplete(e) {
+        ExternalInterface.call("Sound["+this.soundId+"].loaded", e);
+    }
+
+    private function soundIoError(e) {
+        ExternalInterface.call("Sound["+this.soundId+"].error", e);
+    }
+
+    private function soundOpen(e) {
+        ExternalInterface.call("Sound["+this.soundId+"].open", e);
+    }
+
+    private function soundProgress(e) {
+        ExternalInterface.call("Sound["+this.soundId+"].progress", e);
     }
 
 
@@ -112,10 +133,10 @@ class SoundEffect {
     }
 
     public static function Load(src:String) {
-        ExternalInterface.call("console.log", src);
-        var sound:SoundEffect = new SoundEffect(src);
+        var soundId : Int = sounds.length;
+        var sound:SoundEffect = new SoundEffect(src, soundId);
         sounds.push(sound);
-        return sounds.length-1;
+        return soundId;
     }
     
     public static function Play(index:Int, offset:Float, volume:Float, pan:Float) {
@@ -130,20 +151,61 @@ class SoundEffect {
         var sound:SoundChannel = channels[index];
         sound.stop();        
     }
+    
+    public static function GetPosition(index:Int) {
+        var sound:SoundChannel = channels[index];
+        return sound.position;        
+    }
+
+    public static function GetPan(index:Int) {
+        var sound:SoundChannel = channels[index];
+        return sound.soundTransform.pan;
+    }
+
+    public static function GetVolume(index:Int) {
+        var sound:SoundChannel = channels[index];
+        return sound.soundTransform.volume;
+    }
+
+    public static function SetPan(index:Int, pan:Float) {
+        var sound:SoundChannel = channels[index];
+        var transform:SoundTransform = sound.soundTransform;
+        transform.pan = pan;
+        sound.soundTransform = transform;
+    }
+
+    public static function SetVolume(index:Int, volume:Float) {
+        var sound:SoundChannel = channels[index];
+        var transform:SoundTransform = sound.soundTransform;
+        transform.volume = volume;
+        sound.soundTransform = transform;
+    }
+    
+    public static function GetLength(index:Int) {
+        var sound:SoundEffect = sounds[index];
+        return sound.getLength();
+    }
+    
 
     public static function main() {
         ExternalInterface.addCallback("IS_SOUNDEFFECT_JS", IS_SOUNDEFFECT_JS);
         ExternalInterface.addCallback("_load", Load);
         ExternalInterface.addCallback("_play", Play);
         ExternalInterface.addCallback("_stop", Stop);
+        ExternalInterface.addCallback("_getPos", GetPosition);
+        ExternalInterface.addCallback("_getPan", GetPan);
+        ExternalInterface.addCallback("_getVol", GetVolume);
+        ExternalInterface.addCallback("_setPan", SetPan);
+        ExternalInterface.addCallback("_setVol", SetVolume);
+        ExternalInterface.addCallback("_getLen", GetLength);
         ExternalInterface.call([
         "(function(){",
             "var f = function(tag){",
                 "var elems = document.getElementsByTagName(tag);",
                 "for (var i=0; i<elems.length; i++) if (elems[i].IS_SOUNDEFFECT_JS) return elems[i];",
             "};",
-            "SoundEffect._swf = f('embed') || f('object');",
+            "Sound._swf = f('embed') || f('object');",
         "})" ].join(''));
-        ExternalInterface.call("SoundEffect._swfReady");            
+        ExternalInterface.call("Sound._swfReady");            
     }
 }

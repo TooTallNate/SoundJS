@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sound.js Test Page</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+    
+    <script type="text/javascript" src="../Sound.min.js"></script>
+    <script type="text/javascript">
+        // Configure the path to the Sound.js SWF file.
+        Sound.swfPath = "../Sound.swf";
+    
+        document.observe("dom:loaded", function() {
+            var srcs = $$("ul")[0].childElements().collect(function(e) {return e.firstChild.nodeValue;});
+            var template = $("template").remove();
+            var channelTemplate = $("channelTemplate").remove();
+            srcs.each(function(src, i) {
+                (function() {
+                    var ele = template.clone(true);
+                    var sound = null;
+                    ele.select("pre code")[0].update('new Sound("'+src+'")');
+                    ele.select("button").each(function(button, i) {
+                        var click;
+                        switch(i) {
+                            case 0:
+                                click = function(e) {
+                                    sound = new Sound(src);
+                                    sound.addEventListener("open", function(e) {
+                                        ele.addClassName(e.method);
+                                    });
+                                    sound.addEventListener("progress", function(e) {
+
+                                    });
+                                    sound.addEventListener("loaded", function(e) {
+
+                                    });
+                                    sound.addEventListener("error", function(e) {
+
+                                    });
+                                    button.setAttribute("disabled","disabled");
+                                    ele.select("button").without(button).invoke("removeAttribute", "disabled");
+                                }
+                                break;
+                            case 1:
+                                click = function(e) {
+                                    var channel = sound.play();
+                                    var container = channelTemplate.clone(true);
+                                    var done = function() {
+                                        container.fade({ duration: 0.2 });
+                                        clearInterval(interval);
+                                    };
+                                    container.select("button").each(function(b, i) {
+                                        b.observe("click", function() {
+                                            channel.stop();
+                                            done();
+                                        });
+                                    });
+                                    channel.addEventListener("ended", function() {
+                                        done();
+                                    });
+
+                                    ele.insert(container);
+
+                                    var slider = new Control.Slider(container.down('.timeHandle'), container.down('.timeSlider'));
+                                    // Update the position on the slider
+                                    var interval = setInterval(function() {
+                                        slider.setValue(channel.getPosition() / sound.getLength());
+                                    }, 50);
+                                    
+                                }
+                                break;
+                        }
+                        button.observe("click", click);
+                    });
+                    ele.hide();
+                    document.body.appendChild(ele);
+                    ele.appear();
+                    (function() {
+                        ele.down(".Controller").style.width = (ele.select("code")[0].getWidth()+30) + "px";
+                    }).delay(1/10);
+                }).delay(i/2);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2><code>Sound.js</code> Test Page</h2>
+    
+    <ul>
+        <li>../sounds/beep.mp3</li>
+        <li>../sounds/bang.mp3</li>
+        <li>../sounds/explosion.mp3</li>
+        <li>../sounds/Hydrate-Kenny_Beltrey.ogg</li>
+    </ul>
+    
+    <div id="template" class="Sound">
+        <div class="Controller">
+            <pre><code>code</code></pre>
+            <button>new SoundEffect</button>
+            <button disabled>play</button>
+        </div>
+    </div>
+    
+    <div id="channelTemplate" class="SoundChannel">
+        <div class="timeSlider">
+            <div class="timeHandle"></div>
+        </div>
+        <button>stop</button>
+    </div>
+</body>
+</html>

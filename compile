@@ -4,14 +4,20 @@ var sys = require('sys'),
     http = require('http'),
     fs = require('fs'),
     querystring = require('querystring'),
+    path = require('path'),
     spawn = require('child_process').spawn;
 
-var FILE_TO_COMPILE = process.ARGV[2] || "SoundEffect.js";
+//sys.puts(process.argv.join("\n")+"\n");
+
+var FILE_TO_COMPILE = "src/Main.js";
 
 var request = http.createClient(80, 'closure-compiler.appspot.com').request('POST', '/compile', {
     'Host': 'closure-compiler.appspot.com',
     'Content-Type': 'application/x-www-form-urlencoded'
 });
+
+var code = injectScripts(fs.readFileSync(FILE_TO_COMPILE));
+//sys.puts(code+"\n\n");
 
 sys.print("Sending \""+FILE_TO_COMPILE+"\" to Google Closure Compiler");
 var printDots = new PrintDots(30);
@@ -22,8 +28,10 @@ request.write(querystring.stringify({
     'output_info': ['compiled_code', 'warnings', 'errors', 'statistics'],
     //'formatting': 'pretty_print',
     'js_externs': 'swfobject.embedSWF=function(){};',
-    'js_code': fs.readFileSync(FILE_TO_COMPILE)
+    'js_code': code
 }, '&', '=', false));
+
+
 
 request.addListener('response', function (response) {
     var res = "";
@@ -40,7 +48,7 @@ request.addListener('response', function (response) {
         var compiledCode = json.compiledCode;
         delete json.compiledCode;
         sys.puts(sys.inspect(json));
-        var outputFilename = FILE_TO_COMPILE.substring(0, FILE_TO_COMPILE.lastIndexOf('js')) + "min.js";
+        var outputFilename = path.join(__dirname, "Sound.min.js");
         sys.puts('Saving compiled code to "'+outputFilename+'"');
         fs.writeFileSync(outputFilename, compiledCode);
         
@@ -57,9 +65,9 @@ request.end();
  * AFTER the Closure Compiler request completes.
  */
 function haxeCompile() {
-    sys.print("Invoking HaXe Compiler.");
+    sys.print("\nInvoking HaXe Compiler.");
     var dots = new PrintDots(30);
-    var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 SoundEffect.swf".split(" "));
+    var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 Sound.swf".split(" "));
     haxe.stdout.addListener("data", function(data) {
         sys.puts('\nstdout: ' + data);
     });
@@ -81,3 +89,10 @@ function PrintDots(interval) {
     }
 }
 
+function injectScripts(main) {
+    return main.replace(/\/\/{[^{}]+}/g, function(key){
+        var val = key.replace(/[{}]+/g, "").substring(2);
+        sys.puts("Injecting \""+val+"\"");
+        return fs.readFileSync(val);
+    });
+}

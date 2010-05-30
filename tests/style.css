@@ -1,0 +1,77 @@
+ul {
+    display: none;
+}
+
+.Sound {
+    width: 90%;
+    margin: 10px auto;
+    background-color: #ccc;
+    padding: 10px;
+    border: Outset 2px #666;
+    position: relative;
+    
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+
+    -moz-box-shadow: 10px 5px 5px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 10px 5px 5px rgba(0,0,0,0.5);
+    box-shadow: 10px 5px 5px rgba(0,0,0,0.5);
+}
+
+.HTML5 {
+    background-color: #69c;
+    border-color: Outset 2px #369;
+}
+
+.Flash {
+    background-color: #cc3;
+    border-color: Outset 2px #993;
+}
+
+.Controller {
+    width:600px;
+    height:80px;
+    position:relative;
+    display:inline-block;
+}
+
+.Controller pre {
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+
+
+.SoundChannel {
+    width:200px;
+    height:80px;
+    position:relative;
+    display:inline-block;
+    background-color:#666;
+    border: Inset 1px black;
+
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+h2 {
+    text-align:center;
+}
+
+div.timeSlider {
+    width:170px;
+    margin:10px auto;
+    background-color:#ccc;
+    height:10px;
+    position: relative;
+}
+
+div.timeHandle {
+    width:7px;
+    height:15px;
+    background-color:#f00;
+    cursor:move;
+    position:absolute; 
+}
