@@ -22,8 +22,7 @@
  */
 function Sound(src) {
     var self = this,
-        listeners = {},
-        loadedCalled = false;
+        listeners = {};
     self.src = src;
     self.loaded = false;
     
@@ -48,17 +47,30 @@ function Sound(src) {
         //console.log("attempting to load '"+self.src+"' native");
         audio = document.createElement("audio");
     	audio.addEventListener("progress", function(e) {
-            //console.log("native progress");
-            var percentLoaded = e.lengthComputable ? e.loaded / e.total : audio.buffered.end(0) / audio.duration;
-            fire("progress");
-            if (!loadedCalled && percentLoaded >= 0.9) {
-                fire("loaded");
-                loadedCalled = true;
+            var percentLoaded;
+            if (audio.readyState == audio.HAVE_ENOUGH_DATA) {
+                percentLoaded = 1;
+            } else if (e.lengthComputable) {
+                // Firefox specific way of getting load progress
+                // https://developer.mozilla.org/En/Using_audio_and_video_in_Firefox
+                percentLoaded = e.loaded / e.total;
+            } else if (audio.buffered.length > 0) {
+                // WebKit specific way of getting load progress
+                // http://developer.apple.com/safari/library/documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/ControllingMediaWithJavaScript/ControllingMediaWithJavaScript.html#//apple_ref/doc/uid/TP40009523-CH3-SW4
+                percentLoaded = audio.buffered.end(0) / audio.duration;
+            } else {
+                // Fail!
+                percentLoaded = 0;
             }
-            //console.log(percentLoaded);
+            fire("progress");
+            if (!self.loaded && percentLoaded >= 0.9) {
+                self.loaded = true;
+                fire("loaded");
+            }
         }, false);
         audio.addEventListener("error", function(e) {
             fire("error");
+            // On native errors we fall back to Flash
             loadFlash();
         }, false);
         audio.addEventListener("loadstart", function(e) {
@@ -77,6 +89,7 @@ function Sound(src) {
         audio.flash = true;
         audio.src = self.src;
         audio['loaded'] = function() {
+            self.loaded = true;
             fire("loaded");
         }
         audio['error'] = function() {

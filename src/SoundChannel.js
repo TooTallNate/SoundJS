@@ -25,21 +25,25 @@ function SoundChannel(controller, options) {
     // Initialization
     if (controller.flash) {
         // Play through Flash
-        //console.log("attempting to play '" + controller.src + "' via flash: fid=" + controller.id);
         channel = {};
         channel.id = SWF['_play'](controller.id, options['offset'], options['volume'], options['pan']);
         channel.flash = true;
         // ExternalInterface needs a global function to call when the channel completes.
         channel["done"] = function() {
-            delete SoundChannel[channel.id];
             fire("ended");
+            delete SoundChannel[channel.id];
         }
         // Make the 'handler' globally available for Flash ExternalInterface. 
         SoundChannel[channel.id] = channel;
     } else {
         // Play HTML5
-        //console.log("attempting to play '" + controller.src + "' natively");
-        channel = controller.cloneNode(false);
+
+        // controller.cloneNode used to be used here, but Opera 10.5 chokes on
+        // HTMLMediaElement#cloneNode, so this is the compromise. The 'src'
+        // should be immediately fetched from cache, and I can't tell any audible
+        // difference, so this apparently works fine.
+        channel = new Audio(controller.src);
+        
         channel.addEventListener("ended", function(e) {
             fire("ended");
         }, false);
