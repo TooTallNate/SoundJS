@@ -42,6 +42,12 @@ optional `options` Object with any of the values:
  - `volume`: The volume, ranging from 0 (silent) to 1 (full volume). Default 1.
 
 
+<a name="Sound#getLength"></a>
+#### Sound#getLength() → `Number` ####
+
+Gets and returns the total duration of the audio resource, in milliseconds.
+
+
 <a name="Sound#loaded"></a>
 #### Sound#loaded → `Boolean` ####
 
