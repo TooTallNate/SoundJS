@@ -27,8 +27,8 @@
         SWF = null;
 
     
-    //{src/Sound.js}
-    //{src/SoundChannel.js}
+    //{src/js/Sound.js}
+    //{src/js/SoundChannel.js}
 
 
     // Embed the fallback <audio> SWF onto the page

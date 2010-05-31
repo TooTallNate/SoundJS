@@ -22,109 +22,13 @@
  */
 import flash.external.ExternalInterface;
 import flash.events.Event;
-import flash.media.Sound;
 import flash.media.SoundChannel;
 import flash.media.SoundTransform;
 import flash.net.URLRequest;
 
-class SoundEffect {
-    private var src : String;
-    private var sound : Sound;
-    private var soundId : Int;
+class Main {
 
-    public function new(src:String, soundId:Int) {
-        this.src = src;
-        this.soundId = soundId;
-        this.sound = new Sound();
-        this.sound.addEventListener("complete", soundComplete);
-        this.sound.addEventListener("ioError", soundIoError);
-        this.sound.addEventListener("open", soundOpen);
-        this.sound.addEventListener("progress", soundProgress);
-        this.sound.load(new URLRequest(src));
-    }
-
-    public function play(offset:Float, volume:Float, pan:Float, channelId:Int) {
-        var channel : SoundChannel = this.sound.play(offset, 0, new SoundTransform(volume, pan));
-        channel.addEventListener(Event.SOUND_COMPLETE, function(e) {
-            ExternalInterface.call("SoundChannel["+channelId+"].done");
-            channels[channelId] = null;
-        });
-        return channel;
-    }
-    
-    public function getLength() {
-        return this.sound.length;
-    }
-    
-    private function soundComplete(e) {
-        ExternalInterface.call("Sound["+this.soundId+"].loaded", e);
-    }
-
-    private function soundIoError(e) {
-        ExternalInterface.call("Sound["+this.soundId+"].error", e);
-    }
-
-    private function soundOpen(e) {
-        ExternalInterface.call("Sound["+this.soundId+"].open", e);
-    }
-
-    private function soundProgress(e) {
-        ExternalInterface.call("Sound["+this.soundId+"].progress", e);
-    }
-
-
-
-
-
-    /*
-    
-    ///////////////////  Event Handlers  ///////////////////
-    private function soundComplete(e) {
-        ExternalInterface.call("(function() { " +
-            "var s = HTMLAudioElement.__swfSounds["+this.fallbackId+"]; " +
-            "s.__duration = " + (this.sound.length/1000) + "; " +
-            "s.__fireMediaEvent('durationchange'); "+
-            "s.__fireMediaEvent('progress', "+this.sound.bytesLoaded+", "+this.sound.bytesTotal+"); "+
-        "})");
-        //ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "progress", this.sound.bytesLoaded, this.sound.bytesTotal);
-    }
-    
-    private function soundId3(e) {
-        //ExternalInterface.call("console.log", e);
-    }
-    
-    private function soundIoError(e) {
-        this.sound.close();
-        ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__errorCallback");
-    }
-    
-    private function soundOpen(e) {
-    }
-    
-    private function soundProgress(e) {
-        var now : Float = Date.now().getTime();
-        if (!this.metadataSent) {
-            var percent : Float = this.sound.bytesLoaded / this.sound.bytesTotal;
-            // Set the duration to a calculated estimate while its loading
-            this.duration = this.sound.length * this.sound.bytesLoaded / this.sound.bytesTotal / 1000;
-            if (this.duration > 0 && percent > .05) {
-                ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__metadataCallback", this.duration);
-                this.metadataSent = true;
-            }
-        }
-        if (this.sound.bytesLoaded > 0 && now - this.lastProgressEvent > 350) {            
-            this.lastProgressEvent = now;
-            ExternalInterface.call("HTMLAudioElement.__swfSounds["+this.fallbackId+"].__fireMediaEvent", "progress", this.sound.bytesLoaded, this.sound.bytesTotal);
-        }
-    }
-    */
-
-
-
-
-
-
-    public static var sounds :  Array<SoundEffect> = new Array();
+    public static var sounds :  Array<Sound> = new Array();
     public static var channels : Array<SoundChannel> = new Array();
     
     // ExternalInterface functions available to JavaScript
@@ -134,7 +38,7 @@ class SoundEffect {
 
     public static function Load(src:String) {
         var soundId : Int = sounds.length;
-        var sound:SoundEffect = new SoundEffect(src, soundId);
+        var sound : Sound = new Sound(src, soundId);
         sounds.push(sound);
         return soundId;
     }
@@ -188,6 +92,8 @@ class SoundEffect {
     
 
     public static function main() {
+        flash.system.Security.allowDomain("*");
+
         ExternalInterface.addCallback("IS_SOUNDEFFECT_JS", IS_SOUNDEFFECT_JS);
         ExternalInterface.addCallback("_load", Load);
         ExternalInterface.addCallback("_play", Play);

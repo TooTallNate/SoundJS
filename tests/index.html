@@ -8,10 +8,10 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
     
-    <script type="text/javascript" src="../Sound.min.js"></script>
+    <script type="text/javascript" src="../dist/Sound.min.js"></script>
     <script type="text/javascript">
         // Configure the path to the Sound.js SWF file.
-        Sound.swfPath = "../Sound.swf";
+        Sound.swfPath = "../dist/Sound.swf";
     
         document.observe("dom:loaded", function() {
             var srcs = $$("ul")[0].childElements().collect(function(e) {return e.firstChild.nodeValue;});

@@ -9,14 +9,14 @@ var sys = require('sys'),
 
 //sys.puts(process.argv.join("\n")+"\n");
 
-var FILE_TO_COMPILE = "src/Main.js";
+var FILE_TO_COMPILE = "src/js/Main.js";
 
 var request = http.createClient(80, 'closure-compiler.appspot.com').request('POST', '/compile', {
     'Host': 'closure-compiler.appspot.com',
     'Content-Type': 'application/x-www-form-urlencoded'
 });
 
-var code = injectScripts(fs.readFileSync(FILE_TO_COMPILE));
+var code = injectScripts(fs.readFileSync(FILE_TO_COMPILE, 'utf8'));
 //sys.puts(code+"\n\n");
 
 sys.print("Sending \""+FILE_TO_COMPILE+"\" to Google Closure Compiler");
@@ -48,7 +48,7 @@ request.addListener('response', function (response) {
         var compiledCode = json.compiledCode;
         delete json.compiledCode;
         sys.puts(sys.inspect(json));
-        var outputFilename = path.join(__dirname, "Sound.min.js");
+        var outputFilename = path.join(__dirname, "dist/Sound.min.js");
         sys.puts('Saving compiled code to "'+outputFilename+'"');
         fs.writeFileSync(outputFilename, compiledCode);
         
@@ -67,7 +67,7 @@ request.end();
 function haxeCompile() {
     sys.print("\nInvoking HaXe Compiler.");
     var dots = new PrintDots(30);
-    var haxe = spawn("haxe", "-cp src -main SoundEffect -swf-version 10 -swf9 Sound.swf".split(" "));
+    var haxe = spawn("haxe", "-cp src/haxe -main Main -swf-lib lib/omtkp.swf -swf-version 10 -swf9 dist/Sound.swf".split(" "));
     haxe.stdout.addListener("data", function(data) {
         sys.puts('\nstdout: ' + data);
     });
@@ -93,6 +93,6 @@ function injectScripts(main) {
     return main.replace(/\/\/{[^{}]+}/g, function(key){
         var val = key.replace(/[{}]+/g, "").substring(2);
         sys.puts("Injecting \""+val+"\"");
-        return fs.readFileSync(val);
+        return fs.readFileSync(val, 'utf8');
     });
 }
