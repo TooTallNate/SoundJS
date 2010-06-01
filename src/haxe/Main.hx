@@ -103,6 +103,15 @@ class Main {
     
 
     public static function main() {
+        // Needed for OGG Vorbis playback support.
+        // TODO: find a better way to initialize these static bits?
+        org.xiph.fogg.Buffer._s_init();
+        org.xiph.fvorbis.FuncFloor._s_init();
+        org.xiph.fvorbis.FuncMapping._s_init();
+        org.xiph.fvorbis.FuncTime._s_init();
+        org.xiph.fvorbis.FuncResidue._s_init();
+
+
         flash.system.Security.allowDomain("*");
 
         ExternalInterface.addCallback("IS_SOUNDEFFECT_JS", IS_SOUNDEFFECT_JS);
