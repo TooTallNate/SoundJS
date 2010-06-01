@@ -22,7 +22,6 @@
  */
 import flash.external.ExternalInterface;
 import flash.events.Event;
-import flash.media.SoundChannel;
 import flash.media.SoundTransform;
 import flash.net.URLRequest;
 
@@ -38,15 +37,31 @@ class Main {
 
     public static function Load(src:String) {
         var soundId : Int = sounds.length;
-        var sound : Sound = new Sound(src, soundId);
+        var sound : Sound = Sound.getInstance(src);
+        sound.addEventListener(SoundEvent.LOADED, function(e) {
+            ExternalInterface.call("Sound["+soundId+"].loaded", e);
+        });
+        sound.addEventListener(SoundEvent.ERROR, function(e) {
+            ExternalInterface.call("Sound["+soundId+"].error", e);
+        });
+        sound.addEventListener(SoundEvent.OPEN, function(e) {
+            ExternalInterface.call("Sound["+soundId+"].open", e);
+        });
+        sound.addEventListener(SoundEvent.PROGRESS, function(e) {
+            ExternalInterface.call("Sound["+soundId+"].progress", e);
+        });
         sounds.push(sound);
         return soundId;
     }
     
     public static function Play(index:Int, offset:Float, volume:Float, pan:Float) {
         var channelId : Int = channels.length;
-        var sound : SoundEffect = sounds[index];
-        var channel : SoundChannel = sound.play(offset, volume, pan, channelId);
+        var sound : Sound = sounds[index];
+        var channel : SoundChannel = sound.play(offset, volume, pan);
+        channel.addEventListener(Event.SOUND_COMPLETE, function(e) {
+            ExternalInterface.call("SoundChannel["+channelId+"].done");
+            channels[channelId] = null;
+        });
         channels.push(channel);
         return channelId;
     }
@@ -58,35 +73,31 @@ class Main {
     
     public static function GetPosition(index:Int) {
         var sound:SoundChannel = channels[index];
-        return sound.position;        
+        return sound.getPosition();        
     }
 
     public static function GetPan(index:Int) {
         var sound:SoundChannel = channels[index];
-        return sound.soundTransform.pan;
+        return sound.getPan();
     }
 
     public static function GetVolume(index:Int) {
         var sound:SoundChannel = channels[index];
-        return sound.soundTransform.volume;
+        return sound.getVolume();
     }
 
     public static function SetPan(index:Int, pan:Float) {
         var sound:SoundChannel = channels[index];
-        var transform:SoundTransform = sound.soundTransform;
-        transform.pan = pan;
-        sound.soundTransform = transform;
+        sound.setPan(pan);
     }
 
     public static function SetVolume(index:Int, volume:Float) {
         var sound:SoundChannel = channels[index];
-        var transform:SoundTransform = sound.soundTransform;
-        transform.volume = volume;
-        sound.soundTransform = transform;
+        sound.setVolume(volume);
     }
     
     public static function GetLength(index:Int) {
-        var sound:SoundEffect = sounds[index];
+        var sound:Sound = sounds[index];
         return sound.getLength();
     }
     
