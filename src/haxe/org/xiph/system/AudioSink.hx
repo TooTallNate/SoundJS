@@ -6,39 +6,20 @@ import flash.Vector;
 
 import flash.media.Sound;
 import flash.media.SoundChannel;
-import flash.media.SoundTransform;
 import flash.events.SampleDataEvent;
 
 
 class AudioSink {
     var buffer : Bytes;
     public var available : Int;
-    public var triggered : Bool;
+    var triggered : Bool;
     var trigger : Int;
     var fill : Bool;
     var size : Int;
-    var volume:Int;
+
     var s : Sound;
     var sch : SoundChannel;
-    var strans: SoundTransform;
-    var statusCB : String -> Void;
-    var bufferCB : Int -> Void;
-    
-    function doBuffer(value: Int) :Void {
-        if(bufferCB != null) bufferCB(value);
-    }
-    
-    public function setBufferCB(newCB : Int -> Void): Void {
-    	bufferCB = newCB;
-    }
-    
-    function doStatus(state: String) :Void {
-    	if(statusCB != null) statusCB(state);
-    }
-    public function setStatusCB(newCB : String -> Void): Void {
-    	statusCB = newCB;
-    
-    }
+
     public function new(chunk_size : Int, fill = true, trigger = 0) {
         size = chunk_size;
         this.fill = fill;
@@ -50,28 +31,15 @@ class AudioSink {
         buffer = new Bytes();
         available = 0;
         s = new Sound();
-        volume=100;
-        //strans = new SoundTransform(1,0);
         sch = null;
     }
-    public function setVolume(vol : Int) {
-        //strans.volume = (vol+0.0001)/100;
-    	volume = vol;
-    	if (sch != null) {
-    	   trace("Volume change:"+vol);
-    	   strans = sch.soundTransform;
-    	   strans.volume = (volume+0.0001)/100;
-    	   sch.soundTransform = strans;
-    	}
-    }
+
     public function play() : Void {
-        trace("adding callback");
+        //trace("adding callback");
         s.addEventListener("sampleData", _data_cb);
-        trace("playing");
-        doStatus("playing");
-        sch = s.play(0,0,strans);
-        setVolume(volume);
-        trace(sch);
+        //trace("playing");
+        sch = s.play();
+        //trace(sch);
     }
 
     public function stop() : Void {
@@ -92,8 +60,7 @@ class AudioSink {
         }
         i = 0;
         if (missing > 0 && missing != size && fill) {
-            trace("samples data underrun: " + missing);
-            doStatus("error=underflow");
+            //trace("samples data underrun: " + missing);
             while (i < missing) {
                 untyped {
                 event.data.writeFloat(0.0);
@@ -102,17 +69,11 @@ class AudioSink {
                 i++;
             }
         } else if (missing > 0) {
-            trace("not enough data, stopping");
-            doStatus("streamstop");
+            //trace("not enough data, stopping");
             //stop();
         }
     }
-    public function resetBuffer():Void
-    {
-    	buffer.position=0;
-    	buffer.length=0;
-    	available=0;
-    }
+
     public function write(pcm : Array<Vector<Float>>, index : Vector<Int>,
                           samples : Int) : Void {
         var i : Int;
@@ -120,19 +81,17 @@ class AudioSink {
         buffer.position = available * 8; // 2 ch * 4 bytes per sample (float)
         if (pcm.length == 1) {
             // one channel
-            //trace("1 chan");
             var c = pcm[0];
             var s : Float;
             i = index[0];
             end = i + samples;
-            while (i < /*samples*/end) {
+            while (i < samples) {
                 s = c[i++];
                 buffer.writeFloat(s);
                 buffer.writeFloat(s);
             }
         } else if (pcm.length == 2) {
             // two channels
-            //trace("2 chan");
             var c1 = pcm[0];
             var c2 = pcm[1];
             i = index[0];
@@ -145,20 +104,12 @@ class AudioSink {
             }
         } else {
             throw "-EWRONGNUMCHANNELS";
-            doStatus("error=badformat");
         }
 
         available += samples;
         if (!triggered && trigger > 0 && available > trigger) {
             triggered = true;
-            trace("triggered");
-            doBuffer(100);
             play();
-        }
-        else if(!triggered)
-        {
-            var bst=Std.int(available*100/trigger);
-            doBuffer(bst);
         }
     }
 }

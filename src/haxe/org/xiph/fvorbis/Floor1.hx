@@ -261,7 +261,7 @@ class Floor1 extends FuncFloor {
             if (Std.is(memo, Vector)) {
                 fit_value = memo;
             };
-            if ((fit_value == null) || (Std.int(fit_value.length) < look.posts)) {
+            if ((fit_value == null) || (cast(fit_value.length, Int) < look.posts)) {
                 //fit_value = new int[look.posts];
                 fit_value = new Vector(look.posts, true);
             }

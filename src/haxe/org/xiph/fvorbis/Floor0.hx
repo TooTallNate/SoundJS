@@ -128,7 +128,7 @@ class Floor0 extends FuncFloor {
             if ((booknum != -1) && (booknum < info.numbooks)) {
                 // synchronized (this) ...;
                 {
-                    if ((lsp == null) || (Std.int(lsp.length) < look.m)) {
+                    if ((lsp == null) || (cast(lsp.length, Int) < look.m)) {
                         //lsp = new float[look.m];
                         lsp = new Vector(look.m, true);
                     }
@@ -202,7 +202,7 @@ class Floor0 extends FuncFloor {
             if ((booknum != -1) && (booknum < info.numbooks)) {
                 var b : CodeBook = vb.vd.fullbooks[info.books[booknum]];
                 var last : Float = 0.;
-                if ((lsp == null) || (Std.int(lsp.length) < (look.m + 1))) {
+                if ((lsp == null) || (cast(lsp.length, Int) < (look.m + 1))) {
                     //lsp = new float[look.m + 1];
                     lsp = new Vector(look.m + 1, true);
                 }

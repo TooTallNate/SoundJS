@@ -92,7 +92,7 @@ class Block {
         // for-while;
         var i : Int = 0;
         while (i < vi.channels) {
-            if ((pcm[i] == null) || (Std.int(pcm[i].length) < pcmend)) {
+            if ((pcm[i] == null) || (cast(pcm[i].length, Int) < pcmend)) {
                 //pcm[i] = new float[pcmend];
                 pcm[i] = new Vector(pcmend, true);
             }

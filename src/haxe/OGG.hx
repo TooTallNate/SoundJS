@@ -5,100 +5,80 @@
  * decoder to communicate with.
  *
  * The class was created using the existing implementation found here:
- *     http://code.google.com/p/anoggplayer/
+ *     https://launchpad.net/fogg
  */
 import flash.Vector;
+
 import flash.events.Event;
 import flash.events.ProgressEvent;
+
+import flash.external.ExternalInterface;
+
+import flash.media.SoundLoaderContext;
+
+import flash.net.URLRequest;
 import flash.net.URLStream;
+
 import flash.utils.ByteArray;
 
-import org.xiph.fogg.SyncState;
-import org.xiph.fogg.StreamState;
-import org.xiph.fogg.Page;
-import org.xiph.fogg.Packet;
-
-import org.xiph.fvorbis.Info;
-import org.xiph.fvorbis.Comment;
-import org.xiph.fvorbis.DspState;
-import org.xiph.fvorbis.Block;
-
 import org.xiph.foggy.Demuxer;
-//import org.xiph.foggy.DemuxerStatus;
 
-import org.xiph.system.AudioSink;
 import org.xiph.system.Bytes;
 
-
 class OGG extends Sound {
-    private var url : URLRequest;
-    private var stream : URLStream;    
+    var _slc : SoundLoaderContext;
+    var _req : URLRequest;
+    var _ul : URLStream;
+
+    var _c1 : Int;
     
-    var _packets : Int;
-    var vi : Info;
-    var vc : Comment;
-    var vd : DspState;
-    var vb : Block;
-    var dmx : Demuxer;
-
-
-    var _pcm : Array<Array<Vector<Float>>>;
-    var _index : Vector<Int>;
-
-    var read_pending : Bool;
-    var read_started : Bool;
-    var read_buff_pending: Bool;
-    var buff_write_pos:Int;
-    var play_buffered:Bool;//use buffer, don't set to true for streaming?
-    var streamDetected:Bool;//do NOT use buffer.
-
+    private var data : ByteArray;
 
     public function new(url:URLRequest) {
         super();
-        this.url = url;
-        this.stream = new flash.net.URLStream();
-        this.stream.addEventListener(Event.OPEN, onOpen);
-        this.stream.addEventListener(ProgressEvent.PROGRESS, onProgress);
-        this.stream.addEventListener(Event.COMPLETE, onLoaded);
-        this.stream.addEventListener(flash.events.IOErrorEvent.IO_ERROR, onError);
-        this.stream.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, onSecurity);
+        _ul = new URLStream();
 
-        dmx = new Demuxer();
-
-        vi = new Info();
-        vc = new Comment();
-        vd = new DspState();
-        vb = new Block(vd);
-
-        _packets = 0;
-
-        dmx.set_packet_cb(-1, _proc_packet_head);
-
-        // Start loading the OGG Vorbis resource
-        this.stream.load(url);
+        _ul.addEventListener(flash.events.Event.OPEN, onOpen);
+        _ul.addEventListener(flash.events.ProgressEvent.PROGRESS, onProgress);
+        _ul.addEventListener(flash.events.Event.COMPLETE, onLoaded);
+        _ul.addEventListener(flash.events.IOErrorEvent.IO_ERROR, onError);
+        _ul.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, onSecurity);
+                             
+        _req = url;
+        
+        _ul.load(_req);
+        
     }
 
     public override function play(offset:Float, volume:Float, pan:Float) : SoundChannel {
-        return new OGGChannel(this, offset, volume, pan);
+        return new OGGChannel(this.data, offset, volume, pan);
     }
     
-    public override function getLength() {
-        return this.sound.length;
+    public override function getLength() : Float {
+        return 0;
     }
     
+    // URLStream callbacks
     private function onOpen(e) {
-        
+        //ExternalInterface.call("console.log", '_on_open;');
+        this.data = new ByteArray();
+        dispatchEvent(new SoundEvent(SoundEvent.OPEN));
     }
-    private function onOpen(e) {
-        
+    private function onProgress(e) {
+        dispatchEvent(new SoundEvent(SoundEvent.PROGRESS));
     }
-    private function onOpen(e) {
-        
+    private function onLoaded(e) {
+        //ExternalInterface.call("console.log", '_on_complete: ' + _ul.bytesAvailable);
+        _ul.readBytes(this.data);
+        //ExternalInterface.call("console.log", "data loaded: " + this.data.length + " bytes");
+        dispatchEvent(new SoundEvent(SoundEvent.LOADED));
     }
-    private function onOpen(e) {
-        
+    private function onError(e) {
+        ExternalInterface.call("console.log", e);
+        dispatchEvent(new SoundEvent(SoundEvent.ERROR));
     }
-    private function onOpen(e) {
-        
+    private function onSecurity(e) {
+        ExternalInterface.call("console.log", e);
+        dispatchEvent(new SoundEvent(SoundEvent.ERROR));
     }
 }

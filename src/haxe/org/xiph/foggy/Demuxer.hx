@@ -16,6 +16,7 @@ enum DemuxerStatus {
 
 class Demuxer {
     public static inline var ENOTOGG = -1;
+    public static inline var EOF = -2;
 
     var oy : SyncState;
     //var os : StreamState;
@@ -110,13 +111,11 @@ class Demuxer {
 
         cb = page_cbs.get(sn);
         if (cb == null) {
-            //trace("cb==0");
             cb = page_cbs.get(-1);
         }
 
         if (cb != null) {
             cbret = cb(p, sn);
-            trace("cb!=null; "+cbret);
             // TODO handle stop request
         }
 
@@ -124,7 +123,6 @@ class Demuxer {
         if (os == null) {
             if (bos_done) {
                 // unexpected new stream
-                trace("unexpected end of stream");
                 return -1;
             }
             os = new StreamState();
@@ -132,7 +130,6 @@ class Demuxer {
             streams.set(sn, os);
         } else {
             // end of bos pages? handle!...
-           // trace("end of bos");
             if (!bos_done) {
                 bos_done = true;
             }
@@ -140,7 +137,6 @@ class Demuxer {
 
         if (os.pagein(p) < 0) {
             // can happen on an unsupported version
-            trace("unsupported ver");
             return -1;
         }
 
@@ -154,7 +150,6 @@ class Demuxer {
         }
 
         if (p.eos() != 0) {
-            //trace("eos detected");
             os.clear();
             streams.remove(sn);
             if (!streams.iterator().hasNext()) {
