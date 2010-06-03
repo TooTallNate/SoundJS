@@ -27,7 +27,7 @@ type is not supported, and that's where Flash can come in behind the scenes.
  * Multi-layering loaded sounds, for multiple bullet shot sounds for example.
  * Currently supports MP3 and OGG Vorbis. WAV support coming. H.264 is a maybe.
 
-#### Example Usage: ####
+### Example Usage: ###
 
     var shot = new Sound("shot.mp3");
     shot.addEventListener("loaded", function() {
@@ -63,9 +63,9 @@ tool to compile the HaXe source into a Flash SWF file.
 
 #### License ####
 
-Frankly, if it were up to me, I'd release `Sound.js` under the MIT license.
-However since `Sound.js` incorporates some Flash libraries licensed under the
-LGPL license, this library must be as well.
+`Sound.js` incorporates some Flash libraries licensed under the
+[LGPL license](http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License),
+`Sound.js` must be released as LGPL as well.
 
 See the [`COPYING.LESSER`](http://github.com/TooTallNate/Sound.js/blob/master/COPYING.LESSER)
 file for full legal text.
