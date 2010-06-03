@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Sound.js Test Page</title>
+    <link href='http://fonts.googleapis.com/css?family=IM+Fell+DW+Pica:regular,italic' rel='stylesheet' type='text/css'>
     <link href="style.css" rel="stylesheet" type="text/css">
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
@@ -21,7 +22,7 @@
                 (function() {
                     var ele = template.clone(true);
                     var sound = null;
-                    ele.select("pre code")[0].update('new Sound("'+src+'")');
+                    ele.select("pre code")[0].update('new Sound("'+src+'");');
                     ele.select("button").each(function(button, i) {
                         var click;
                         switch(i) {
@@ -87,7 +88,10 @@
     </script>
 </head>
 <body>
-    <h2><code>Sound.js</code> Test Page</h2>
+    <h1><b><i>Sound.js</i></b> Test Page</h1>
+    
+    <h3><span id="HTML5Legend" class="Legend"></span> = HTML5 <span id="FlashLegend" class="Legend"></span> = Flash<br>
+        <span id="NotLoadedLegend" class="Legend"></span> = Not Loaded</h3>
     
     <ul>
         <li>../sounds/beep.mp3</li>
@@ -100,12 +104,13 @@
     <div id="template" class="Sound">
         <div class="Controller">
             <pre><code>code</code></pre>
-            <button>new SoundEffect</button>
+            <button>new Sound</button>
             <button disabled>play</button>
         </div>
     </div>
     
     <div id="channelTemplate" class="SoundChannel">
+        <div class="channelTitle">SoundChannel</div>
         <div class="timeSlider">
             <div class="timeHandle"></div>
         </div>
