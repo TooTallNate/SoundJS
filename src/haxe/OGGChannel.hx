@@ -74,6 +74,8 @@ class OGGChannel extends SoundChannel {
     }
     
     public override function stop() : Void {
+        _sch.removeEventListener(Event.SOUND_COMPLETE, channelComplete);
+        _sch.stop();
     }
 
     public override function getPosition() : Float {
@@ -161,6 +163,7 @@ class OGGChannel extends SoundChannel {
         _data_min = true;
         if (_decoding && _sch == null) {
             _sch = _s.play(); //??
+            _sch.addEventListener(Event.SOUND_COMPLETE, channelComplete);
         }
     }
 
@@ -172,16 +175,13 @@ class OGGChannel extends SoundChannel {
     function _on_under_max() : Void {
         //@ ExternalInterface.call("console.log", '_on_under_max');
         _need_samples = true;
-        //_decode();
         haxe.Timer.delay(_decode, 0);
     }
 
 
 
     // VSoundDecoder callback
-    function _on_decoded(pcm : Array<Vector<Float>>, index : Vector<Int>,
-                         samples : Int) : Void
-    {
+    function _on_decoded(pcm : Array<Vector<Float>>, index : Vector<Int>, samples : Int) : Void {
         _aq.write(pcm, index, samples);
     }
 
@@ -189,6 +189,8 @@ class OGGChannel extends SoundChannel {
 
     // Sound data callback
     function _data_cb(event : SampleDataEvent) : Void {
+        //ExternalInterface.call("console.log", _c1);
+        
         var avail : Int = _aq._samples;
         var to_write = avail > 8192 ? 8192 : avail; // FIXME: unhardcode!
 
@@ -199,5 +201,10 @@ class OGGChannel extends SoundChannel {
         } else {
             //ExternalInterface.call("console.log", '_data_cb: UNDERRUN');
         }
+    }
+    
+    private function channelComplete(e) {
+        //ExternalInterface.call("console.log", 'channelComplete');
+        dispatchEvent(new SoundEvent(Event.SOUND_COMPLETE));
     }
 }

@@ -6,48 +6,37 @@
  *
  * The class was created using the existing implementation found here:
  *     https://launchpad.net/fogg
+ *  
+ *  Revision 58 of the FOgg repo hosted at the link above was used as a base.
  */
 import flash.Vector;
-
 import flash.events.Event;
 import flash.events.ProgressEvent;
-
 import flash.external.ExternalInterface;
-
 import flash.media.SoundLoaderContext;
-
 import flash.net.URLRequest;
 import flash.net.URLStream;
-
 import flash.utils.ByteArray;
-
 import org.xiph.foggy.Demuxer;
-
 import org.xiph.system.Bytes;
 
 class OGG extends Sound {
-    var _slc : SoundLoaderContext;
-    var _req : URLRequest;
-    var _ul : URLStream;
-
-    var _c1 : Int;
-    
+    private var _slc : SoundLoaderContext;
+    private var _req : URLRequest;
+    private var _ul : URLStream;
     private var data : ByteArray;
 
     public function new(url:URLRequest) {
         super();
-        _ul = new URLStream();
+        _req = url;
 
-        _ul.addEventListener(flash.events.Event.OPEN, onOpen);
-        _ul.addEventListener(flash.events.ProgressEvent.PROGRESS, onProgress);
-        _ul.addEventListener(flash.events.Event.COMPLETE, onLoaded);
+        _ul = new URLStream();
+        _ul.addEventListener(Event.OPEN, onOpen);
+        _ul.addEventListener(ProgressEvent.PROGRESS, onProgress);
+        _ul.addEventListener(Event.COMPLETE, onLoaded);
         _ul.addEventListener(flash.events.IOErrorEvent.IO_ERROR, onError);
         _ul.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, onSecurity);
-                             
-        _req = url;
-        
         _ul.load(_req);
-        
     }
 
     public override function play(offset:Float, volume:Float, pan:Float) : SoundChannel {
@@ -60,17 +49,26 @@ class OGG extends Sound {
     
     // URLStream callbacks
     private function onOpen(e) {
-        //ExternalInterface.call("console.log", '_on_open;');
+        //ExternalInterface.call("console.log", 'onOpen');
+        //ExternalInterface.call("console.log", e);
         this.data = new ByteArray();
         dispatchEvent(new SoundEvent(SoundEvent.OPEN));
     }
     private function onProgress(e) {
-        dispatchEvent(new SoundEvent(SoundEvent.PROGRESS));
+        //ExternalInterface.call("console.log", 'onProgress');
+        //ExternalInterface.call("console.log", e);
+        var newBytes : Int = e.bytesLoaded - this.data.length;
+        if (newBytes > 0) {
+            ExternalInterface.call("console.log", newBytes);
+            _ul.readBytes(this.data, this.data.length, newBytes);
+        
+            dispatchEvent(new SoundEvent(SoundEvent.PROGRESS));
+        }
     }
     private function onLoaded(e) {
-        //ExternalInterface.call("console.log", '_on_complete: ' + _ul.bytesAvailable);
-        _ul.readBytes(this.data);
-        //ExternalInterface.call("console.log", "data loaded: " + this.data.length + " bytes");
+        ExternalInterface.call("console.log", 'onComplete');
+        
+        //_ul.readBytes(this.data);
         dispatchEvent(new SoundEvent(SoundEvent.LOADED));
     }
     private function onError(e) {

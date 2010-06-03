@@ -7,11 +7,11 @@ class MP3Channel extends SoundChannel {
     public function new(sound : flash.media.Sound, offset:Float, volume:Float, pan:Float) {
         super();
         this.channel = sound.play(offset, 0, new SoundTransform(volume, pan));
-        channel.addEventListener(Event.SOUND_COMPLETE, channelComplete);
+        this.channel.addEventListener(Event.SOUND_COMPLETE, channelComplete);
     }
     
     public override function stop() : Void {
-        channel.removeEventListener(Event.SOUND_COMPLETE, channelComplete);
+        this.channel.removeEventListener(Event.SOUND_COMPLETE, channelComplete);
         this.channel.stop();
     }
 
