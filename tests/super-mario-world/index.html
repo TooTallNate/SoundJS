@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sound.js: Super Mario World Soundboard</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+    
+    <script type="text/javascript" src="../../dist/Sound.min.js"></script>
+    <script type="text/javascript">
+        // Configure the path to the Sound.js SWF file.
+        Sound.swfPath = "../../dist/Sound.swf";
+    
+        document.observe("dom:loaded", function() {
+            
+            $$(".Sound").each(function(img) {
+                img.hide();
+                var wavFile = img.src.substring(img.src.lastIndexOf('/')+1).replace(".gif",".wav");
+                var sound = new Sound("../../sounds/super-mario-world/sound-effects/" + wavFile);
+                sound.addEventListener("loaded", function() {
+                    // Fade in the image once the sound finishes loading
+                    img.appear();
+                    img.store("sound", sound);
+                });
+            });
+            
+            document.observe("mouseover",function(e) {
+                e.stop();
+                var soundImg = e.findElement(".Sound");
+                if (soundImg) {
+                    if (!soundImg.retrieve("naturalKnown")) {
+                        soundImg.store("naturalWidth", soundImg.width);
+                        soundImg.store("naturalHeight", soundImg.height);
+                        soundImg.store("naturalKnown", true);
+                    }
+                    var grow = soundImg.retrieve("grow");
+                    if (grow) grow.cancel();
+                    soundImg.store("grow", new Effect.Morph(soundImg, {
+                        style: {
+                            width:soundImg.retrieve("naturalWidth")*2+"px",
+                            height:soundImg.retrieve("naturalheight")*2+"px"
+                        }
+                    }));
+                }
+            }).observe("mouseout", function(e) {
+                e.stop();
+                var soundImg = e.findElement(".Sound");
+                if (soundImg) {
+                    var grow = soundImg.retrieve("grow");
+                    if (grow) grow.cancel();
+                    soundImg.store("grow", new Effect.Morph(soundImg, {
+                        style: {
+                            width:soundImg.retrieve("naturalWidth")+"px",
+                            height:soundImg.retrieve("naturalheight")+"px"
+                        }
+                    }));
+                }
+            }).observe("mousedown", function(e) {
+                e.stop();
+            }).observe("click", function(e) {
+                e.stop();
+                var soundImg = e.findElement(".Sound");
+                if (soundImg) {
+                    var sound = soundImg.retrieve("sound");
+                    if (sound) sound.play();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <img src="logo.gif" id="logo" alt="Logo">
+    
+    <img src="mushroom.gif" class="Sound">
+    <img src="1up.gif" class="Sound">
+    <img src="coin.gif" class="Sound">
+    <img src="death.gif" class="Sound">
+    <img src="spinjump.gif" class="Sound">
+    <img src="yoshicoin.gif" class="Sound">
+    <img src="helpbox.gif" class="Sound">
+    <img src="caperaise.gif" class="Sound">
+    <img src="drumloop.gif" class="Sound">
+    <img src="egghatch.gif" class="Sound">
+    <img src="kick.gif" class="Sound">
+    <img src="fireball.gif" class="Sound">
+    <img src="jump.gif" class="Sound">
+</body>
+</html>
