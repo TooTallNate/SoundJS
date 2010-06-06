@@ -34,7 +34,6 @@ import flash.events.Event;
 import flash.events.IOErrorEvent;
 import flash.events.ProgressEvent;
 import flash.events.SecurityErrorEvent;
-import flash.external.ExternalInterface;
 import flash.media.SoundLoaderContext;
 import flash.net.URLRequest;
 import flash.net.URLStream;
@@ -58,7 +57,14 @@ class OGG extends Sound {
         _ul.addEventListener(Event.COMPLETE, onLoaded);
         _ul.addEventListener(IOErrorEvent.IO_ERROR, onError);
         _ul.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurity);
-        _ul.load(_req);
+        try {
+            _ul.load(_req);
+        } catch (e:Dynamic) {
+            var t = this;
+            haxe.Timer.delay(function() {
+                t.onSecurity(e);
+            }, 0);
+        }
     }
 
     public override function play(offset:Float, volume:Float, pan:Float) : SoundChannel {
@@ -71,34 +77,24 @@ class OGG extends Sound {
     
     // URLStream callbacks
     private function onOpen(e) {
-        //ExternalInterface.call("console.log", 'onOpen');
-        //ExternalInterface.call("console.log", e);
         this.data = new ByteArray();
         dispatchEvent(new SoundEvent(SoundEvent.OPEN));
     }
     private function onProgress(e) {
-        //ExternalInterface.call("console.log", 'onProgress');
-        //ExternalInterface.call("console.log", e);
         var newBytes : Int = e.bytesLoaded - this.data.length;
         if (newBytes > 0) {
-            ExternalInterface.call("console.log", newBytes);
             _ul.readBytes(this.data, this.data.length, newBytes);
         
             dispatchEvent(new SoundEvent(SoundEvent.PROGRESS));
         }
     }
     private function onLoaded(e) {
-        ExternalInterface.call("console.log", 'onComplete');
-        
-        //_ul.readBytes(this.data);
         dispatchEvent(new SoundEvent(SoundEvent.LOADED));
     }
     private function onError(e) {
-        ExternalInterface.call("console.log", e);
         dispatchEvent(new SoundEvent(SoundEvent.ERROR));
     }
     private function onSecurity(e) {
-        ExternalInterface.call("console.log", e);
         dispatchEvent(new SoundEvent(SoundEvent.ERROR));
     }
 }

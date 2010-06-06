@@ -21,7 +21,6 @@ import flash.events.Event;
 import flash.events.IOErrorEvent;
 import flash.events.ProgressEvent;
 import flash.events.SecurityErrorEvent;
-import flash.external.ExternalInterface;
 import flash.net.URLRequest;
 import ru.etcs.events.WaveSoundEvent;
 import ru.etcs.media.WaveSound;
@@ -32,10 +31,11 @@ class WAV extends Sound {
     public function new(url:URLRequest) {
         super();
         wave = new WaveSound(url);
+        wave.addEventListener(Event.OPEN, onOpen);
         wave.addEventListener(Event.COMPLETE, onLoaded);
-        //wave.addEventListener(ProgressEvent.PROGRESS, onProgress);
+        wave.addEventListener(ProgressEvent.PROGRESS, onProgress);
         //wave.addEventListener(WaveSoundEvent.DECODE_ERROR, onDecodeError);
-        //wave.addEventListener(IOErrorEvent.IO_ERROR, onIoError);
+        wave.addEventListener(IOErrorEvent.IO_ERROR, onIoError);
         //wave.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHttpStatus);
     }
     
@@ -48,15 +48,18 @@ class WAV extends Sound {
     }
     
     private function onOpen(e) {
-        //ExternalInterface.call("console.log", 'onOpen');
-        //ExternalInterface.call("console.log", e);
         dispatchEvent(new SoundEvent(SoundEvent.OPEN));
     }
 
-    private function onLoaded(e) {
-        ExternalInterface.call("console.log", 'onComplete');
-        
+    private function onLoaded(e) {        
         dispatchEvent(new SoundEvent(SoundEvent.LOADED));
     }
     
+    private function onIoError(e) {
+        dispatchEvent(new SoundEvent(SoundEvent.ERROR));
+    }
+
+    private function onProgress(e) {
+        dispatchEvent(new SoundEvent(SoundEvent.PROGRESS));
+    }
 }

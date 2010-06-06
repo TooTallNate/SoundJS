@@ -23,7 +23,6 @@
  * flash.media.Sound class. MP3 is the only natively supported filetype
  * able to be stream from a server with this class.
  */
-import flash.external.ExternalInterface;
 import flash.events.Event;
 import flash.net.URLRequest;
 

@@ -35,18 +35,24 @@ class Main {
     public static function Load(src:String) {
         var soundId : Int = sounds.length;
         var sound : Sound = Sound.getInstance(src);
-        sound.addEventListener(SoundEvent.LOADED, function(e) {
-            ExternalInterface.call("Sound["+soundId+"].loaded", e);
-        });
-        sound.addEventListener(SoundEvent.ERROR, function(e) {
-            ExternalInterface.call("Sound["+soundId+"].error", e);
-        });
-        sound.addEventListener(SoundEvent.OPEN, function(e) {
-            ExternalInterface.call("Sound["+soundId+"].open", e);
-        });
-        sound.addEventListener(SoundEvent.PROGRESS, function(e) {
-            ExternalInterface.call("Sound["+soundId+"].progress", e);
-        });
+        if (sound != null) {
+            sound.addEventListener(SoundEvent.LOADED, function(e) {
+                ExternalInterface.call("Sound["+soundId+"].loaded", e);
+            });
+            sound.addEventListener(SoundEvent.ERROR, function(e) {
+                ExternalInterface.call("Sound["+soundId+"].error", e);
+            });
+            sound.addEventListener(SoundEvent.OPEN, function(e) {
+                ExternalInterface.call("Sound["+soundId+"].open", e);
+            });
+            sound.addEventListener(SoundEvent.PROGRESS, function(e) {
+                ExternalInterface.call("Sound["+soundId+"].progress", e);
+            });
+        } else {
+            haxe.Timer.delay(function() {
+                ExternalInterface.call("Sound["+soundId+"].error", new SoundEvent(SoundEvent.ERROR, "Unsupported File Extension"));                
+            }, 100);
+        }
         sounds.push(sound);
         return soundId;
     }

@@ -25,8 +25,10 @@ class SoundEvent extends Event {
     public static var ERROR:String = "error";
     public static var PROGRESS:String = "progress";
 
-    public function new(command:String) {
+    public var message:String;
+
+    public function new(command:String, ?message:String=null) {
         super(command);
-        // TODO: Something?
+        this.message = message;
     }
 }

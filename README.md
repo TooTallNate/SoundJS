@@ -25,7 +25,8 @@ type is not supported, and that's where Flash can come in behind the scenes.
  * First attempts to use native HTML5 Audio to load and play back the sound.
  * Falls back to Flash when HTML5 fails or is not implemented.
  * Multi-layering loaded sounds, for multiple bullet shot sounds for example.
- * Currently supports MP3 and OGG Vorbis. WAV support coming. H.264 is a maybe.
+ * Guarantees cross-browser support for MP3, OGG Vorbis, and uncompressed WAV!
+ H.264 works on HTML5 browsers that support it (no Flash fallback _yet_).
 
 ### Example Usage: ###
 

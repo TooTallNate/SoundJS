@@ -18,20 +18,14 @@
  *
  */
 import flash.Vector;
-
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.SampleDataEvent;
-
-import flash.external.ExternalInterface;
-
 import flash.media.Sound;
 import flash.media.SoundTransform;
-
 import flash.utils.ByteArray;
 
 import org.xiph.foggy.Demuxer;
-
 import org.xiph.system.ADQueue;
 import org.xiph.system.Bytes;
 import org.xiph.system.VSoundDecoder;
@@ -87,7 +81,7 @@ class OGGChannel extends SoundChannel {
 
         _s = new Sound();
         _sch = null;
-        _s.addEventListener("sampleData", _data_cb);
+        _s.addEventListener(SampleDataEvent.SAMPLE_DATA, _data_cb);
 
         haxe.Timer.delay(_decode, 0);
     }
@@ -119,14 +113,10 @@ class OGGChannel extends SoundChannel {
     
     
     function _try_write_data() : Void {
-        //ExternalInterface.call("console.log", "_try_write_data");
         _read_pending = false;
 
         if (! _need_data)
             return;
-
-        //ExternalInterface.call("console.log", '_try_write_data: ' + [_need_data, _ul.bytesAvailable,
-        //                             _data_complete, _need_samples]);
 
         var to_read : Int = this.data.length;
         if (to_read >= DATA_CHUNK_SIZE) {
@@ -156,7 +146,6 @@ class OGGChannel extends SoundChannel {
     }
 
     function _decode() : Void {
-        //ExternalInterface.call("console.log", "_decode");
         var result : Int = 0;
 
         while(_need_samples && (result = _dec.dmx.process(1)) == 1) {
@@ -178,21 +167,18 @@ class OGGChannel extends SoundChannel {
 
     // ADQueue callbacks
     function _on_over_min() : Void {
-        //ExternalInterface.call("console.log", '_on_over_min');
         _data_min = true;
         if (_decoding && _sch == null) {
-            _sch = _s.play(); //??
+            _sch = _s.play();
             _sch.addEventListener(Event.SOUND_COMPLETE, channelComplete);
         }
     }
 
     function _on_over_max() : Void {
-        //@ ExternalInterface.call("console.log", '_on_over_max');
         _need_samples = false;
     }
 
     function _on_under_max() : Void {
-        //@ ExternalInterface.call("console.log", '_on_under_max');
         _need_samples = true;
         haxe.Timer.delay(_decode, 0);
     }
@@ -208,22 +194,17 @@ class OGGChannel extends SoundChannel {
 
     // Sound data callback
     function _data_cb(event : SampleDataEvent) : Void {
-        //ExternalInterface.call("console.log", _c1);
-        
         var avail : Int = _aq._samples;
         var to_write = avail > 8192 ? 8192 : avail; // FIXME: unhardcode!
 
         if (to_write > 0) {
             _aq.read(event.data, to_write);
             _c1 += to_write;
-            //ExternalInterface.call("console.log", '_data_cb: ' + [avail, _c1]);
         } else {
-            //ExternalInterface.call("console.log", '_data_cb: UNDERRUN');
         }
     }
     
     private function channelComplete(e) {
-        //ExternalInterface.call("console.log", 'channelComplete');
         dispatchEvent(new SoundEvent(Event.SOUND_COMPLETE));
     }
 }

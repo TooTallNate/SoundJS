@@ -23,7 +23,6 @@
  * meant to be abstract, but I don't know if HaXe is capable of that.
  */
 import flash.events.EventDispatcher;
-import flash.external.ExternalInterface;
 import flash.net.URLRequest;
  
 class Sound extends EventDispatcher {
@@ -43,7 +42,6 @@ class Sound extends EventDispatcher {
         } else if (~/\.(wav)(\?.*)?$/i.match(src)) {
             return new WAV(url);
         }
-        ExternalInterface.call("console.log", 'ERROR: Unsupported file extension');
         return null;
     }
 }
