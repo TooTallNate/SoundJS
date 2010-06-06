@@ -17,6 +17,10 @@
  * License along with Sound.js.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+ 
+// The count for Flash ID's to use
+var flashSoundCount = 0;
+ 
 function Sound(src) {
     var self = this,
         listeners = {};
@@ -60,7 +64,17 @@ function Sound(src) {
                 percentLoaded = 0;
             }
             fire("progress");
+            /* Testing letting "canplaythrough" take care of this instead...
             if (!self.loaded && percentLoaded >= 0.9) {
+                self.loaded = true;
+                fire("loaded");
+            }
+            */
+        }, false);
+        // Aside from inspecting the progress event, we can also listen for
+        // the "canplaythrough" event as a psuedo-loaded event.
+        audio.addEventListener("canplaythrough", function(e) {
+            if (!self.loaded) {
                 self.loaded = true;
                 fire("loaded");
             }
@@ -82,7 +96,8 @@ function Sound(src) {
     var loadFlash = function() {
         //console.log("attempting to load '"+self.src+"' via flash");
         audio = {};
-        audio.id = SWF['_load'](self.src);
+        audio.id = flashSoundCount++;
+        SWF['_load'](self.src);
         audio.flash = true;
         audio.src = self.src;
         audio['loaded'] = function() {
@@ -151,7 +166,7 @@ function Sound(src) {
         return "[object Sound]";
     }
     // Debug
-    //self['audio'] = audio;
+    self['audio'] = audio;
 }
     
 Sound['version'] = VERSION;
@@ -161,8 +176,14 @@ Sound['swfPath'] = "Sound.swf";
  * Called by Flash ExternalInterface when the Flash object has finished loading.
  */
 Sound['_swfReady'] = function() {
-    // Get the SWF object into our local scope, and delete the global reference.        
+    // Get the SWF object into our local scope, and delete the global reference.
+    var prematureCalls = SWF, i=0, funcName = null;
     SWF = Sound['_swf'];
     delete Sound['_swf'];
     delete Sound['_swfReady'];
+    for (; i<prematureCalls.length; i++) {
+        for (funcName in prematureCalls[i]) {
+            prematureCalls[i][funcName]();
+        }
+    }
 }

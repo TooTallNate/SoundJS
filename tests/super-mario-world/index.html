@@ -12,7 +12,7 @@
     <script type="text/javascript">
         // Configure the path to the Sound.js SWF file.
         Sound.swfPath = "../../dist/Sound.swf";
-    
+            
         document.observe("dom:loaded", function() {
             var logo = $("logo").hide();
             
@@ -44,8 +44,8 @@
                 sound.addEventListener("loaded", function() {
                     // Fade in the image once the sound finishes loading
                     img.appear();
-                    img.store("sound", sound);
                 });
+                img.store("sound", sound);
             });
             
             document.observe("mouseover",function(e) {
@@ -85,6 +85,8 @@
                     }));
                 }
             }).observe("mousedown", function(e) {
+                e.stop();
+            }).observe("contextmenu", function(e) {
                 e.stop();
             }).observe("click", function(e) {
                 e.stop();

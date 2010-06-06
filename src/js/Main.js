@@ -21,7 +21,17 @@
     var VERSION = "0.1",
         IS_IE = navigator.appName == 'Microsoft Internet Explorer',
         HAS_NATIVE_AUDIO = !!global['HTMLAudioElement'],
-        SWF = null;
+        // Initally, SWF will contain an array that will hold premature calls
+        // (function references) to the SWF before it has been initalized.
+        // Once it gets initalized, the array will be drained, and replaced
+        // with the actual Flash instance.
+        SWF = [];
+    SWF['_load'] = function() {
+        var args = arguments;
+        SWF.push(function() {
+            SWF['_load'].apply(SWF, args);
+        });
+    };
 
     
     //{src/js/Sound.js}
