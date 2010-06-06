@@ -67,7 +67,7 @@ request.end();
 function haxeCompile() {
     sys.print("\nInvoking HaXe Compiler.");
     var dots = new PrintDots(30);
-    var haxe = spawn("haxe", "-cp src/haxe -main Main -swf-version 10 -swf9 dist/Sound.swf".split(" "));
+    var haxe = spawn("haxe", "-cp src/haxe -main Main -swf-lib lib/WAVPlayerProject.swf -swf-version 10 -swf9 dist/Sound.swf".split(" "));
     haxe.stdout.addListener("data", function(data) {
         sys.puts('\nstdout: ' + data);
     });

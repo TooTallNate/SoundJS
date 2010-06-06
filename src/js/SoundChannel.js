@@ -62,7 +62,7 @@ function SoundChannel(controller, options) {
         // HTMLMediaElement#cloneNode, so this is the compromise. The 'src'
         // should be immediately fetched from cache, and I can't tell any audible
         // difference, so this apparently works fine.
-        channel = new Audio(controller.src);
+        channel = new Audio(controller["currentSrc"]);
         
         channel.addEventListener("ended", function(e) {
             fire("ended");

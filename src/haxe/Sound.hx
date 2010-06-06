@@ -40,6 +40,8 @@ class Sound extends EventDispatcher {
             return new MP3(url);
         } else if (~/\.(ogg|oga)(\?.*)?$/i.match(src)) {
             return new OGG(url);
+        } else if (~/\.(wav)(\?.*)?$/i.match(src)) {
+            return new WAV(url);
         }
         ExternalInterface.call("console.log", 'ERROR: Unsupported file extension');
         return null;

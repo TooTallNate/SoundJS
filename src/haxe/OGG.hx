@@ -31,7 +31,9 @@
  */
 import flash.Vector;
 import flash.events.Event;
+import flash.events.IOErrorEvent;
 import flash.events.ProgressEvent;
+import flash.events.SecurityErrorEvent;
 import flash.external.ExternalInterface;
 import flash.media.SoundLoaderContext;
 import flash.net.URLRequest;
@@ -54,8 +56,8 @@ class OGG extends Sound {
         _ul.addEventListener(Event.OPEN, onOpen);
         _ul.addEventListener(ProgressEvent.PROGRESS, onProgress);
         _ul.addEventListener(Event.COMPLETE, onLoaded);
-        _ul.addEventListener(flash.events.IOErrorEvent.IO_ERROR, onError);
-        _ul.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, onSecurity);
+        _ul.addEventListener(IOErrorEvent.IO_ERROR, onError);
+        _ul.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurity);
         _ul.load(_req);
     }
 
