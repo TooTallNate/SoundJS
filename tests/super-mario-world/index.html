@@ -14,9 +14,31 @@
         Sound.swfPath = "../../dist/Sound.swf";
     
         document.observe("dom:loaded", function() {
+            var logo = $("logo").hide();
+            
+            var beginning = new Sound("../../sounds/super-mario-world/background-music/beginning.ogg");
+            beginning.addEventListener("loaded", function() {
+                beginning.play();
+                logo.style.top = "-10%";
+                logo.appear({duration:5});
+                new Effect.Parallel([
+                    new Effect.Appear(logo, {
+                        sync: true,
+                    }), new Effect.Morph(logo, {
+                        sync: true,
+                        style: { top: "50%" }
+                    })
+                ], {
+                    duration: 8,
+                    transition: Effect.Transitions.spring
+                });
+            });
             
             $$(".Sound").each(function(img) {
-                img.hide();
+                img.hide().setStyle({
+                    top: (Math.random()*95).floor() + "%",
+                    left: (Math.random()*95).floor() + "%"
+                });
                 var wavFile = img.src.substring(img.src.lastIndexOf('/')+1).replace(".gif",".wav");
                 var sound = new Sound("../../sounds/super-mario-world/sound-effects/" + wavFile);
                 sound.addEventListener("loaded", function() {
@@ -39,9 +61,12 @@
                     if (grow) grow.cancel();
                     soundImg.store("grow", new Effect.Morph(soundImg, {
                         style: {
+                            marginTop:(-soundImg.retrieve("naturalHeight")/2)+"px",
+                            marginLeft:(-soundImg.retrieve("naturalWidth")/2)+"px",                            
                             width:soundImg.retrieve("naturalWidth")*2+"px",
                             height:soundImg.retrieve("naturalheight")*2+"px"
-                        }
+                        },
+                        duration: .3
                     }));
                 }
             }).observe("mouseout", function(e) {
@@ -52,6 +77,8 @@
                     if (grow) grow.cancel();
                     soundImg.store("grow", new Effect.Morph(soundImg, {
                         style: {
+                            marginTop:"0px",
+                            marginLeft:"0px",                            
                             width:soundImg.retrieve("naturalWidth")+"px",
                             height:soundImg.retrieve("naturalheight")+"px"
                         }
@@ -64,7 +91,10 @@
                 var soundImg = e.findElement(".Sound");
                 if (soundImg) {
                     var sound = soundImg.retrieve("sound");
-                    if (sound) sound.play();
+                    if (sound) {
+                        sound.play();
+                        Effect.Pulsate(soundImg, { pulses: 3, duration: sound.getLength()/1000 });
+                    }
                 }
             });
         });
@@ -86,5 +116,9 @@
     <img src="kick.gif" class="Sound">
     <img src="fireball.gif" class="Sound">
     <img src="jump.gif" class="Sound">
+    <img src="key.gif" class="Sound">
+    <img src="sprout.gif" class="Sound">
+    <img src="yoshi.gif" class="Sound">
+    <img src="feather.gif" class="Sound">
 </body>
 </html>

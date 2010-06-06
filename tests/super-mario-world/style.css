@@ -6,15 +6,16 @@ html, body {
 }
 
 #logo {
-    width: 208px;
-    height: 66px;
-    margin-top: -33px;
-    margin-left: -104px;
+    width: 312px;
+    height: 99px;
+    margin-top: -50px;
+    margin-left: -156px;
     position: absolute;
     top: 50%;
     left: 50%;
 }
 
 .Sound {
+    position:absolute;
     cursor:pointer;
 }
