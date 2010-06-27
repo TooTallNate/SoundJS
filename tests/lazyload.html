@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sound.js</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+
+    <script type="text/javascript">
+        function lazyLoadSoundJs() {
+            var script = document.createElement("script");
+            script.setAttribute("type", "text/javascript");
+            script.onload = scriptLoaded;
+            script.src = "../dist/Sound.min.js";
+            document.getElementsByTagName("head")[0].appendChild(script);
+        }
+        
+        function scriptLoaded() {
+            // Configure the path to the Sound.js SWF file.
+            Sound.swfPath = "../dist/Sound.swf";
+        }
+    </script>
+</head>
+<body onload="lazyLoadSoundJs();">
+    
+</body>
+</html>

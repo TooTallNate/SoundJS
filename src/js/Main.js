@@ -52,6 +52,7 @@
             };
         container.id = id;
         document.body.appendChild(container);
+        //console.log("Embedding SWF at: " + Sound['swfPath']);
         swfobject.embedSWF(Sound['swfPath'], id, 8, 8, "10", false, flashvars, params, attributes);
     }
     
@@ -62,27 +63,29 @@
         embedSwf();
     }
     
-    // DOM loaded code
-    if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', init, false);
-    }
-    (function() {
-        if (IS_IE) {
-            try {
-                document.body.doScroll('up');
-                return init();
-            } catch(e) {}
-        } else {
-            if (/loaded|complete/.test(document.readyState)) return init();
+    setTimeout(function() {
+        // DOM loaded code
+        if (document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', init, false);
         }
-        if (!init.done) setTimeout(arguments.callee, 30);
-    })();
-    if (global.addEventListener) {
-        global.addEventListener('load', init, false);
-    } else if (global.attachEvent) {
-        global.attachEvent('onload', init);
-    }
-    // end DOM loaded code
+        (function() {
+            if (IS_IE) {
+                try {
+                    document.body.doScroll('up');
+                    return init();
+                } catch(e) {}
+            } else {
+                if (/loaded|complete/.test(document.readyState)) return init();
+            }
+            if (!init.done) setTimeout(arguments.callee, 30);
+        })();
+        if (global.addEventListener) {
+            global.addEventListener('load', init, false);
+        } else if (global.attachEvent) {
+            global.attachEvent('onload', init);
+        }
+        // end DOM loaded code
+    }, 0);
     
     
     
