@@ -1,17 +1,17 @@
-Sound.js
+SoundJS
 ========
 
-`Sound.js` is a library that provides browsers with a JavaScript sound API
+`SoundJS` is a library that provides browsers with a JavaScript sound API
 that first tries audio files with native HTML5 Audio and falls back to Flash
 when necessary.
 
-Specifically, the `Sound.js` API offers the ability to play the same sound
+Specifically, the `SoundJS` API offers the ability to play the same sound
 file more than once at a time, even while the same sound is already playing.
 This is also known as multi-layering sounds. 
 
 ### Motivation: ###
 
-`Sound.js` is specifically created for the
+`SoundJS` is specifically created for the
 [Simple Game Framework](http://www.simplegameframework.com) HTML engine. HTML5
 Audio is a nice idea, but the spec provides no multi-layering support, meaning
 a single `<audio>` instance can only play it's `src` once at a time. There's
@@ -20,7 +20,7 @@ type is not supported, and that's where Flash can come in behind the scenes.
 
 ### Features: ###
 
- * Provides a simple API to load sounds initially, and create play instances
+ * Provides a simple API to load sounds initially, and create _play instances_
  when the sound has enough data to start playing or has loaded completely.
  * First attempts to use native HTML5 Audio to load and play back the sound.
  * Falls back to Flash when HTML5 fails or is not implemented.
@@ -40,7 +40,7 @@ type is not supported, and that's where Flash can come in behind the scenes.
         setTimeout(playShot, 234);
     });
 
-View the [full API docs](http://github.com/TooTallNate/Sound.js/blob/master/API.md)
+View the [full API docs](http://github.com/TooTallNate/SoundJS/blob/master/API.md)
 for the complete picture.
 
 #### Building Flash Source and Minimizing JavaScript ####
@@ -64,9 +64,9 @@ tool to compile the HaXe source into a Flash SWF file.
 
 #### License ####
 
-`Sound.js` incorporates some Flash libraries licensed under the
+`SoundJS` incorporates some Flash libraries licensed under the
 [LGPL license](http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License),
-`Sound.js` must be released as LGPL as well.
+`SoundJS` must be released as LGPL as well.
 
-See the [`COPYING.LESSER`](http://github.com/TooTallNate/Sound.js/blob/master/COPYING.LESSER)
+See the [`COPYING.LESSER`](http://github.com/TooTallNate/SoundJS/blob/master/COPYING.LESSER)
 file for full legal text.

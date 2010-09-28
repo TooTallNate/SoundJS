@@ -1,7 +1,7 @@
-Sound.js - API
+SoundJS - API
 ==============
 
-`Sound.js` is designed to have a simple and familiar API. Two new global
+`SoundJS` is designed to have a simple and familiar API. Two new global
 constructors are exposed: [`Sound`](#Sound) and
 [`SoundChannel`](#SoundChannel), which are designed to loosely resemble Flash's
 [Sound](http://www.adobe.com/livedocs/flash/9.0/ActionScriptLangRefV3/flash/media/Sound.html)
@@ -14,7 +14,7 @@ API's.
 ### Sound ###
 
 The `Sound` class is what you will be mostly working with. Playing sounds with
-`Sound.js` starts by loading an audio resource with the `new Sound`
+`SoundJS` starts by loading an audio resource with the `new Sound`
 constructor.
 
 <a name="Sound#new"></a>
@@ -71,7 +71,7 @@ This value is checked every time `new Sound` is called. If it is set to
 <a name="Sound.version"></a>
 #### Sound.version → `String` ####
 
-The version String of `Sound.js`. Can be useful for debugging or verification
+The version String of `SoundJS`. Can be useful for debugging or verification
 purposes.
 
 
