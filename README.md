@@ -1,4 +1,4 @@
-SoundJS
+SoundJS - An amazing project
 ========
 
 `SoundJS` is a library that provides browsers with a JavaScript sound API
